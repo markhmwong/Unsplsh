@@ -41,11 +41,9 @@ class MainViewController: UIViewController {
 		view.addSubview(tableView)
 		_vm.registerCellsFor(tableView)
 		tableView.anchorView(top: view.topAnchor, bottom: view.bottomAnchor, leading: view.leadingAnchor, trailing: view.trailingAnchor, centerY: nil, centerX: nil, padding: .zero, size: .zero)
-		_vm.configureDataSource(tableView)
 		let apiSession = ApiSession()
 		apiSession.beginRequestForLatestImages { (photos) in
 			_vm.preparePhotos(data: photos)
-			_vm.updateDatasourceSnapshot()
 		}
 	}
 
