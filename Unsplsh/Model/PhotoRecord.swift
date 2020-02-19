@@ -14,8 +14,8 @@ enum ImageStatus {
 	case Downloaded
 }
 
-class PhotoRecord {
-	
+class PhotoRecord: Hashable {
+
 	let author: String
 	let url: URL
 	var image = UIImage(contentsOfFile: "Logo.png")
@@ -26,6 +26,14 @@ class PhotoRecord {
 		self.author = name
 		self.url = url
 		self.bio = bio
+	}
+	
+	func hash(into hasher: inout Hasher) {
+		hasher.combine(author)
+	}
+	
+	static func == (lhs: PhotoRecord, rhs: PhotoRecord) -> Bool {
+		return lhs.author == rhs.author
 	}
 }
 

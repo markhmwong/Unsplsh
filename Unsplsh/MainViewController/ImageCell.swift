@@ -91,14 +91,20 @@ class ImageCell: UITableViewCell {
 	}
 	
 	func updateImage(_ image: UIImage) {
-		photoView.image = image
+		DispatchQueue.main.async {
+			self.photoView.image = image
+		}
 	}
 	
 	func updateNameLabel(_ name: String) {
-		nameLabel.attributedText = NSMutableAttributedString(string: name, attributes: [NSAttributedString.Key.font: UIFont(name: "Avenir-Medium", size: 10.0)!, NSAttributedString.Key.foregroundColor: UIColor.white])
+		DispatchQueue.main.async {
+			self.nameLabel.attributedText = NSMutableAttributedString(string: name, attributes: [NSAttributedString.Key.font: UIFont(name: "Avenir-Medium", size: 10.0)!, NSAttributedString.Key.foregroundColor: UIColor.white])
+		}
 	}
 	
 	func updateBioLabel(_ name: String) {
-		bioLabel.attributedText = NSMutableAttributedString(string: name, attributes: [NSAttributedString.Key.font: UIFont(name: "Avenir-Medium", size: 10.0)!, NSAttributedString.Key.foregroundColor: UIColor.white])
+		DispatchQueue.main.async {
+			self.bioLabel.attributedText = NSMutableAttributedString(string: name, attributes: [NSAttributedString.Key.font: UIFont(name: "Avenir-Medium", size: 10.0)!, NSAttributedString.Key.foregroundColor: UIColor.white])
+		}
 	}
 }

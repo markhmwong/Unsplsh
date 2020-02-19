@@ -8,23 +8,37 @@
 
 import UIKit
 
+enum PhotoSection {
+	case Main
+}
+
 class MainViewModel {
 	
 	private let cellId = "UnsplshCellId"
 	
-	var photos: [PhotoRecord]? = []
+	private var photos: [PhotoRecord]? = []
 	
-	let pendingOperations = PendingOperations()
+	private let pendingOperations = PendingOperations()
+	
+	private var diffDatasource: UITableViewDiffableDataSource<PhotoSection, PhotoRecord>?
 	
 	init() {
 		
+	}
+	
+	func preparePhotos(data: [Photo]) {
+		for photo in data {
+			if let url = URL(string: photo.urls.regular) {
+				photos?.append(PhotoRecord(name: photo.user.name, url: url, bio:photo.user.bio ?? "Unknown"))
+			}
+		}
 	}
 	
 	func registerCellsFor(_ tableView: UITableView) {
 		tableView.register(ImageCell.self, forCellReuseIdentifier: cellId)
 	}
 	
-	func tableForCell(_ tableView: UITableView, indexPath: IndexPath) -> ImageCell {
+	func cellForTableView(_ tableView: UITableView, indexPath: IndexPath, photo: PhotoRecord) -> ImageCell {
 		let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! ImageCell
 		cell.photoOperations = { [weak self] (photo) in
 			// begin to download the image if state is new
@@ -38,19 +52,34 @@ class MainViewModel {
 			}
 		}
 		
-		// because photoOperations closure runs when photoDetails is set, we need this ahead of cell.photoOperations
 		cell.photoDetails = photos?[indexPath.row]
 		cell.updateImage(cell.photoDetails?.image ?? UIImage(named: "Logo.png")!)
 		cell.updateNameLabel(cell.photoDetails?.author ?? "Unknown")
 		cell.updateBioLabel(cell.photoDetails?.bio ?? "Unknown")
 		return cell
 	}
-	
-	func numberOfRowsFor(_ tableView: UITableView) -> Int {
-		guard let p = photos else {
-			return 0
+
+	func heightForCell(_ tableView: UITableView, indexPath: IndexPath) -> CGFloat {
+		guard let currentImage = photos?[indexPath.row].image else {
+			let height = UITableView.automaticDimension
+			return height > 100.0 ? UITableView.automaticDimension : 350.0
 		}
-		return p.count
+		let widthRatio = CGFloat(currentImage.size.width / currentImage.size.height)
+		return widthRatio
+	}
+	
+	func configureDataSource(_ tableView: UITableView) {
+		diffDatasource = UITableViewDiffableDataSource(tableView: tableView) { (tableView, indexPath, photo) -> UITableViewCell? in
+			self.cellForTableView(tableView, indexPath: indexPath, photo: photo)
+		}
+	}
+	
+	func updateDatasourceSnapshot() {
+		guard let _photos = photos, let _diffDatasource = diffDatasource else { return }
+		var snapshot = NSDiffableDataSourceSnapshot<PhotoSection, PhotoRecord>()
+		snapshot.appendSections([.Main])
+		snapshot.appendItems(_photos)
+		_diffDatasource.apply(snapshot, animatingDifferences: true)
 	}
 	
 	func startDownload(_ photo: PhotoRecord, indexPath: IndexPath, tableView: UITableView) {
@@ -63,24 +92,11 @@ class MainViewModel {
 			if downloader.isCancelled {
 				return
 			}
-
-			// reload the cell once the download is complete to load the image
-			DispatchQueue.main.async {
-				self.pendingOperations.downloadsInProgress.removeValue(forKey: indexPath)
-				tableView.reloadRows(at: [indexPath], with: .fade)
-			}
+			self.updateDatasourceSnapshot()
+			self.pendingOperations.downloadsInProgress.removeValue(forKey: indexPath)
 		}
 		
 		pendingOperations.downloadsInProgress[indexPath] = downloader
 		pendingOperations.downloadQueue.addOperation(downloader)
-	}
-	
-	func heightForCell(_ tableView: UITableView, indexPath: IndexPath) -> CGFloat {
-		guard let currentImage = photos?[indexPath.row].image else {
-			let height = UITableView.automaticDimension
-			return height > 100.0 ? UITableView.automaticDimension : 350.0
-		}
-		let widthRatio = CGFloat(currentImage.size.width / currentImage.size.height)
-		return widthRatio
 	}
 }
