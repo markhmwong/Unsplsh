@@ -76,10 +76,12 @@ class MainViewModel {
 	
 	func updateDatasourceSnapshot() {
 		guard let _photos = photos, let _diffDatasource = diffDatasource else { return }
+	
 		var snapshot = NSDiffableDataSourceSnapshot<PhotoSection, PhotoRecord>()
 		snapshot.appendSections([.Main])
 		snapshot.appendItems(_photos)
 		_diffDatasource.apply(snapshot, animatingDifferences: true)
+
 	}
 	
 	func startDownload(_ photo: PhotoRecord, indexPath: IndexPath, tableView: UITableView) {
@@ -92,8 +94,19 @@ class MainViewModel {
 			if downloader.isCancelled {
 				return
 			}
+
 			self.updateDatasourceSnapshot()
 			self.pendingOperations.downloadsInProgress.removeValue(forKey: indexPath)
+			
+			// Important point here to mark. As the operations for downloading the image are asynchronous, the updageImage() function must be called to apply the image to the imageview
+			DispatchQueue.main.async {
+				if let visible = tableView.indexPathsForVisibleRows {
+					if (visible.contains(indexPath)) {
+						let cell = tableView.cellForRow(at: indexPath) as! ImageCell
+						cell.updateImage(cell.photoDetails?.image ?? UIImage(named: "Logo.png")!)
+					}
+				}
+			}
 		}
 		
 		pendingOperations.downloadsInProgress[indexPath] = downloader

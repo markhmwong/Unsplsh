@@ -14,7 +14,6 @@ class ImageCell: UITableViewCell {
 		didSet {
 			guard let _photoDetails = photoDetails else { return }
 			textLabel?.text = _photoDetails.author
-			
 			photoOperations?(_photoDetails)
 			
 			if accessoryView == nil {
