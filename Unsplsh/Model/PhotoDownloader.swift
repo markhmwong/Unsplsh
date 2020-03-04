@@ -38,13 +38,5 @@ class PhotoDownloader: Operation {
 	
 }
 
-// Ray Wenderlich NSOperation tutorials
-class PendingOperations {
-	lazy var downloadsInProgress: [IndexPath: Operation] = [:]
-	lazy var downloadQueue: OperationQueue = {
-		var queue = OperationQueue()
-		queue.name = "Download queue"
-		queue.maxConcurrentOperationCount = 1
-		return queue
-	}()
-}
+
+

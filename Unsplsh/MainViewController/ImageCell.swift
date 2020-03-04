@@ -13,7 +13,7 @@ class ImageCell: UITableViewCell {
 	var photoDetails: PhotoRecord? {
 		didSet {
 			guard let _photoDetails = photoDetails else { return }
-			textLabel?.text = _photoDetails.author
+//			textLabel?.text = _photoDetails.author
 			
 			photoOperations?(_photoDetails)
 			
@@ -69,10 +69,10 @@ class ImageCell: UITableViewCell {
 	}
 	
 	func setupCellLayout() {
-		addSubview(photoView)
+		contentView.addSubview(photoView)
 		photoView.layer.addSublayer(coverLayer)
-		addSubview(nameLabel)
-		addSubview(bioLabel)
+		contentView.addSubview(nameLabel)
+		contentView.addSubview(bioLabel)
 		
 		photoView.anchorView(top: topAnchor, bottom: bottomAnchor, leading: leadingAnchor, trailing: trailingAnchor, centerY: nil, centerX: nil, padding: .zero, size: .zero)
 		nameLabel.anchorView(top: nil, bottom: bioLabel.topAnchor, leading: nil, trailing: trailingAnchor, centerY: nil, centerX: nil, padding: .zero, size: .zero)
